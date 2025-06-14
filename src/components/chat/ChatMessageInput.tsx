@@ -1,5 +1,5 @@
-import { useWindowResize } from "@/hooks/useWindowResize";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
+import { MicrophoneIcon } from "../playground/icons";
 
 type ChatMessageInput = {
   placeholder: string;
@@ -15,13 +15,6 @@ export const ChatMessageInput = ({
   onSend,
 }: ChatMessageInput) => {
   const [message, setMessage] = useState("");
-  const [inputTextWidth, setInputTextWidth] = useState(0);
-  const [inputWidth, setInputWidth] = useState(0);
-  const hiddenInputRef = useRef<HTMLSpanElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const windowSize = useWindowResize();
-  const [isTyping, setIsTyping] = useState(false);
-  const [inputHasFocus, setInputHasFocus] = useState(false);
 
   const handleSend = useCallback(() => {
     if (!onSend) {
@@ -35,88 +28,34 @@ export const ChatMessageInput = ({
     setMessage("");
   }, [onSend, message]);
 
-  useEffect(() => {
-    setIsTyping(true);
-    const timeout = setTimeout(() => {
-      setIsTyping(false);
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [message]);
-
-  useEffect(() => {
-    if (hiddenInputRef.current) {
-      setInputTextWidth(hiddenInputRef.current.clientWidth);
-    }
-  }, [hiddenInputRef, message]);
-
-  useEffect(() => {
-    if (inputRef.current) {
-      setInputWidth(inputRef.current.clientWidth);
-    }
-  }, [hiddenInputRef, message, windowSize.width]);
-
   return (
     <div
-      className="flex flex-col gap-2 border-t border-t-gray-800"
+      className="flex flex-row gap-2 items-center border-t border-t-gray-200 bg-white p-4"
       style={{ height: height }}
     >
-      <div className="flex flex-row pt-3 gap-2 items-center relative">
-        <div
-          className={`w-2 h-4 bg-${inputHasFocus ? accentColor : "gray"}-${
-            inputHasFocus ? 500 : 800
-          } ${inputHasFocus ? "shadow-" + accentColor : ""} absolute left-2 ${
-            !isTyping && inputHasFocus ? "cursor-animation" : ""
-          }`}
-          style={{
-            transform:
-              "translateX(" +
-              (message.length > 0
-                ? Math.min(inputTextWidth, inputWidth - 20) - 4
-                : 0) +
-              "px)",
-          }}
-        ></div>
-        <input
-          ref={inputRef}
-          className={`w-full text-xs caret-transparent bg-transparent opacity-25 text-gray-300 p-2 pr-6 rounded-sm focus:opacity-100 focus:outline-none focus:border-${accentColor}-700 focus:ring-1 focus:ring-${accentColor}-700`}
-          style={{
-            paddingLeft: message.length > 0 ? "12px" : "24px",
-            caretShape: "block",
-          }}
-          placeholder={placeholder}
-          value={message}
-          onChange={(e) => {
-            setMessage(e.target.value);
-          }}
-          onFocus={() => {
-            setInputHasFocus(true);
-          }}
-          onBlur={() => {
-            setInputHasFocus(false);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSend();
-            }
-          }}
-        ></input>
-        <span
-          ref={hiddenInputRef}
-          className="absolute top-0 left-0 text-xs pl-3 text-amber-500 pointer-events-none opacity-0"
-        >
-          {message.replaceAll(" ", "\u00a0")}
-        </span>
-        <button
-          disabled={message.length === 0 || !onSend}
-          onClick={handleSend}
-          className={`text-xs uppercase text-${accentColor}-500 hover:bg-${accentColor}-950 p-2 rounded-md opacity-${
-            message.length > 0 ? 100 : 25
-          } pointer-events-${message.length > 0 ? "auto" : "none"}`}
-        >
-          Send
-        </button>
-      </div>
+      <input
+        className={`flex-grow text-sm bg-gray-100 text-gray-800 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500`}
+        placeholder={placeholder}
+        value={message}
+        onChange={(e) => {
+          setMessage(e.target.value);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSend();
+          }
+        }}
+      ></input>
+      <button
+        disabled={message.length === 0 || !onSend}
+        onClick={handleSend}
+        className={`text-sm uppercase text-white bg-lime-600 hover:bg-lime-700 p-3 rounded-lg disabled:opacity-50`}
+      >
+        Send
+      </button>
+      <button className="p-3 bg-lime-600 text-white rounded-lg hover:bg-lime-700">
+        <MicrophoneIcon />
+      </button>
     </div>
   );
 };
