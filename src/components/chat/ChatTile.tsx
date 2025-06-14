@@ -3,7 +3,7 @@ import { ChatMessageInput } from "@/components/chat/ChatMessageInput";
 import { ChatMessage as ComponentsChatMessage } from "@livekit/components-react";
 import { useEffect, useRef } from "react";
 
-const inputHeight = 48;
+const inputHeight = 96;
 
 export type ChatMessageType = {
   name: string;
@@ -27,10 +27,10 @@ export const ChatTile = ({ messages, accentColor, onSend }: ChatTileProps) => {
   }, [containerRef, messages]);
 
   return (
-    <div className="flex flex-col gap-4 w-full h-full">
+    <div className="flex flex-col w-full h-full">
       <div
         ref={containerRef}
-        className="overflow-y-auto"
+        className="overflow-y-auto p-4"
         style={{
           height: `calc(100% - ${inputHeight}px)`,
         }}
@@ -55,7 +55,7 @@ export const ChatTile = ({ messages, accentColor, onSend }: ChatTileProps) => {
       </div>
       <ChatMessageInput
         height={inputHeight}
-        placeholder="Type a message"
+        placeholder="Ask me a question..."
         accentColor={accentColor}
         onSend={onSend}
       />
