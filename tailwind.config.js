@@ -25,6 +25,7 @@ const colorList = [
   "pink",
   "teal",
   "red",
+  "lime",
 ];
 const uiElements = [
   "bg",
@@ -47,6 +48,7 @@ const customColors = {
   pink: colors.pink,
   teal: colors.teal,
   red: colors.red,
+  lime: colors.lime,
 };
 
 let customShadows = {};
