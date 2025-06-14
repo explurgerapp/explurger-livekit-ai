@@ -6,14 +6,12 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { Inter } from "next/font/google";
 import Head from "next/head";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 
-import { PlaygroundConnect } from "@/components/PlaygroundConnect";
 import Playground from "@/components/playground/Playground";
-import { PlaygroundToast, ToastType } from "@/components/toast/PlaygroundToast";
+import { PlaygroundToast } from "@/components/toast/PlaygroundToast";
 import { ConfigProvider, useConfig } from "@/hooks/useConfig";
 import {
-  ConnectionMode,
   ConnectionProvider,
   useConnection,
 } from "@/hooks/useConnection";
@@ -21,6 +19,7 @@ import { useMemo } from "react";
 import { ToastProvider, useToast } from "@/components/toast/ToasterProvider";
 
 const themeColors = [
+  "lime",
   "cyan",
   "green",
   "amber",
@@ -53,26 +52,25 @@ export function HomeInner() {
   const { toastMessage, setToastMessage } = useToast();
 
   const handleConnect = useCallback(
-    async (c: boolean, mode: ConnectionMode) => {
-      c ? connect(mode) : disconnect();
+    async (c: boolean) => {
+      // Automatically connect using environment variables
+      c ? connect("env") : disconnect();
     },
     [connect, disconnect],
   );
 
-  const showPG = useMemo(() => {
-    if (process.env.NEXT_PUBLIC_LIVEKIT_URL) {
-      return true;
+  // Auto-connect on component mount
+  useEffect(() => {
+    if (!shouldConnect) {
+      handleConnect(true);
     }
-    if (wsUrl) {
-      return true;
-    }
-    return false;
-  }, [wsUrl]);
+  }, [handleConnect, shouldConnect]);
+
 
   return (
     <>
       <Head>
-        <title>{config.title}</title>
+        <title>Nivu - Your Explurger AI Assistant</title>
         <meta name="description" content={config.description} />
         <meta
           name="viewport"
@@ -88,20 +86,7 @@ export function HomeInner() {
         <meta property="og:image:height" content="630" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="relative flex flex-col justify-center px-4 items-center h-full w-full bg-black repeating-square-background">
-        <AnimatePresence>
-          {toastMessage && (
-            <motion.div
-              className="left-0 right-0 top-0 absolute z-10"
-              initial={{ opacity: 0, translateY: -50 }}
-              animate={{ opacity: 1, translateY: 0 }}
-              exit={{ opacity: 0, translateY: -50 }}
-            >
-              <PlaygroundToast />
-            </motion.div>
-          )}
-        </AnimatePresence>
-        {showPG ? (
+      <main className="flex flex-col justify-center px-4 items-center h-full w-full">
           <LiveKitRoom
             className="flex flex-col h-full w-full"
             serverUrl={wsUrl}
@@ -115,21 +100,12 @@ export function HomeInner() {
             <Playground
               themeColors={themeColors}
               onConnect={(c) => {
-                const m = process.env.NEXT_PUBLIC_LIVEKIT_URL ? "env" : mode;
-                handleConnect(c, m);
+                handleConnect(c);
               }}
             />
             <RoomAudioRenderer />
             <StartAudio label="Click to enable audio playback" />
           </LiveKitRoom>
-        ) : (
-          <PlaygroundConnect
-            accentColor={themeColors[0]}
-            onConnectClicked={(mode) => {
-              handleConnect(true, mode);
-            }}
-          />
-        )}
       </main>
     </>
   );
